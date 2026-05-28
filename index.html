@@ -326,7 +326,9 @@
   <div class="logo"><span>//</span> PIONEER 3-DX <span>//</span> MAPA INTERATIVO <span>// v2.0</span></div>
   <div class="status-bar">
     <div class="status-item"><span class="blink"></span>LIVE</div>
-    <div class="status-item">OBSTÁCULOS: <b id="statObst">0</b></div>
+    <div class="status-item">ALTA: <b id="statObstHigh">0</b></div>
+    <div class="status-item">MÉDIA: <b id="statObstMed">0</b></div>
+    <div class="status-item">BAIXA: <b id="statObstLow">0</b></div>
     <div class="status-item">TRILHA: <b id="statTrail">0</b></div>
     <div class="status-item">WAYPOINTS: <b id="statWp">0</b></div>
     <div class="status-item">ZOOM: <b id="statZoom">1.0×</b></div>
@@ -387,10 +389,22 @@
     <div class="sidebar-section">
       <h3>Camadas</h3>
       <div class="layer-item">
-        <label for="layerObst">
-          <span class="layer-dot" style="background:var(--cyan)"></span>Obstáculos
+        <label for="layerObstHigh">
+          <span class="layer-dot" style="background:#00ff00"></span>Alta Certeza
         </label>
-        <label class="toggle"><input type="checkbox" id="layerObst" checked onchange="render()"><span class="toggle-slider"></span></label>
+        <label class="toggle"><input type="checkbox" id="layerObstHigh" checked onchange="render()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="layer-item">
+        <label for="layerObstMed">
+          <span class="layer-dot" style="background:#ffff00"></span>Média Certeza
+        </label>
+        <label class="toggle"><input type="checkbox" id="layerObstMed" checked onchange="render()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="layer-item">
+        <label for="layerObstLow">
+          <span class="layer-dot" style="background:#ff3b5c"></span>Baixa Certeza
+        </label>
+        <label class="toggle"><input type="checkbox" id="layerObstLow" checked onchange="render()"><span class="toggle-slider"></span></label>
       </div>
       <div class="layer-item">
         <label for="layerTrail">
@@ -409,6 +423,17 @@
           <span class="layer-dot" style="background:var(--waypoint)"></span>Waypoints
         </label>
         <label class="toggle"><input type="checkbox" id="layerWp" checked onchange="render()"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+
+    <!-- Legenda de Certeza -->
+    <div class="sidebar-section">
+      <h3>Legenda de Certeza</h3>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;line-height:2;">
+        <div><span style="color:#00ff00">■</span> Alta &nbsp;&nbsp;(sinal ≥ 950)</div>
+        <div><span style="color:#ffff00">■</span> Média &nbsp;(sinal ≥ 875)</div>
+        <div><span style="color:#ff3b5c">■</span> Baixa &nbsp;(sinal ≥ 800)</div>
+        <div><span style="color:#ff5722">■</span> Trilha percorrida</div>
       </div>
     </div>
 
@@ -527,7 +552,7 @@ function render() {
   if (!hasMap) return;
 
   const showGrid  = document.getElementById('layerGrid').checked;
-  const showObst  = document.getElementById('layerObst').checked;
+  const showObst  = document.getElementById('layerObst') ? document.getElementById('layerObst').checked : false;
   const showTrail = document.getElementById('layerTrail').checked;
   const showWp    = document.getElementById('layerWp').checked;
 
@@ -552,8 +577,18 @@ function render() {
     ctx.stroke();
   }
 
-  // Cells
-  let obstCount = 0, trailCount = 0;
+  // Valores do novo protocolo:
+  // 2  = trilha (VAL_PATH)
+  // 10 = baixa certeza (OBS_LOW_CONF)  → vermelho
+  // 20 = média certeza (OBS_MED_CONF)  → amarelo
+  // 30 = alta certeza (OBS_HIGH_CONF)  → verde
+  // Legado: 1 = obstáculo ciano (versões antigas)
+  const showObstHigh = document.getElementById('layerObstHigh') ? document.getElementById('layerObstHigh').checked : true;
+  const showObstMed  = document.getElementById('layerObstMed')  ? document.getElementById('layerObstMed').checked  : true;
+  const showObstLow  = document.getElementById('layerObstLow')  ? document.getElementById('layerObstLow').checked  : true;
+
+  let obstHigh = 0, obstMed = 0, obstLow = 0, trailCount = 0;
+
   for (let gx = 0; gx < MAP_SIZE; gx++) {
     for (let gy = 0; gy < MAP_SIZE; gy++) {
       const val = mapGrid[gx * MAP_SIZE + gy];
@@ -562,18 +597,48 @@ function render() {
       const py = offsetY + gy * cellSize;
       if (px + cellSize < 0 || px > W || py + cellSize < 0 || py > H) continue;
 
-      if (val === 1 && showObst) {
-        obstCount++;
-        const s = Math.max(cellSize, 2);
+      const s = Math.max(cellSize, 2);
+
+      if (val === 2 && showTrail) {
+        // Trilha laranja
+        trailCount++;
+        ctx.fillStyle = '#ff5722';
+        ctx.fillRect(px, py, Math.max(cellSize * 0.6, 1), Math.max(cellSize * 0.6, 1));
+
+      } else if (val === 30 && showObstHigh) {
+        // Alta certeza — verde
+        obstHigh++;
+        ctx.fillStyle = '#00ff00';
+        ctx.shadowColor = '#00ff00';
+        ctx.shadowBlur = cellSize > 3 ? 5 : 0;
+        ctx.fillRect(px, py, s, s);
+        ctx.shadowBlur = 0;
+
+      } else if (val === 20 && showObstMed) {
+        // Média certeza — amarelo
+        obstMed++;
+        ctx.fillStyle = '#ffff00';
+        ctx.shadowColor = '#ffff00';
+        ctx.shadowBlur = cellSize > 3 ? 3 : 0;
+        ctx.fillRect(px, py, s, s);
+        ctx.shadowBlur = 0;
+
+      } else if (val === 10 && showObstLow) {
+        // Baixa certeza — vermelho
+        obstLow++;
+        ctx.fillStyle = '#ff3b5c';
+        ctx.shadowColor = '#ff3b5c';
+        ctx.shadowBlur = cellSize > 3 ? 2 : 0;
+        ctx.fillRect(px, py, s, s);
+        ctx.shadowBlur = 0;
+
+      } else if (val === 1 && showObst) {
+        // Legado: obstáculo ciano (JSONs de versões antigas)
         ctx.fillStyle = '#00e5ff';
         ctx.shadowColor = '#00e5ff';
         ctx.shadowBlur = cellSize > 3 ? 4 : 0;
         ctx.fillRect(px, py, s, s);
         ctx.shadowBlur = 0;
-      } else if (val === 2 && showTrail) {
-        trailCount++;
-        ctx.fillStyle = '#ff5722';
-        ctx.fillRect(px, py, Math.max(cellSize * 0.6, 1), Math.max(cellSize * 0.6, 1));
       }
     }
   }
@@ -617,8 +682,10 @@ function render() {
   }
 
   // Update stats
-  document.getElementById('statObst').textContent  = obstCount;
-  document.getElementById('statTrail').textContent = trailCount;
+  document.getElementById('statObstHigh').textContent = obstHigh;
+  document.getElementById('statObstMed').textContent  = obstMed;
+  document.getElementById('statObstLow').textContent  = obstLow;
+  document.getElementById('statTrail').textContent    = trailCount;
   document.getElementById('statWp').textContent    = waypoints.length;
   document.getElementById('statZoom').textContent  = zoom.toFixed(1) + '×';
   document.getElementById('zoomVal').textContent   = zoom.toFixed(1) + '×';
