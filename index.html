@@ -2,86 +2,81 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pioneer 3-DX — Mapa Interativo</title>
+<title>Pioneer 3-DX — Mapa 3D</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;500;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap');
 
   :root {
-    --bg:        #0d0d0f;
-    --panel:     #13131a;
-    --border:    #1e2235;
-    --cyan:      #00e5ff;
-    --orange:    #ff5722;
-    --green:     #33ff33;
-    --white:     #e8eaf0;
-    --dim:       #3a3f55;
-    --danger:    #ff3b5c;
-    --waypoint:  #ffe600;
+    --bg:      #080b10;
+    --panel:   #0d1117;
+    --border:  #1a2235;
+    --cyan:    #00e5ff;
+    --orange:  #ff5722;
+    --green:   #00ff6a;
+    --yellow:  #ffd600;
+    --red:     #ff3d5a;
+    --dim:     #2a3550;
+    --text:    #c8d4e8;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin:0; padding:0; box-sizing:border-box; }
 
   body {
     background: var(--bg);
-    color: var(--white);
+    color: var(--text);
     font-family: 'Rajdhani', sans-serif;
-    font-weight: 500;
+    font-weight: 600;
     height: 100vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
   }
 
-  /* ── TOP BAR ── */
+  /* ── HEADER ── */
   header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 20px;
+    padding: 8px 20px;
     border-bottom: 1px solid var(--border);
     background: var(--panel);
     flex-shrink: 0;
+    z-index: 10;
   }
 
   .logo {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--cyan);
     letter-spacing: 3px;
-    text-transform: uppercase;
   }
-  .logo span { color: var(--dim); }
+  .logo em { color: var(--dim); font-style: normal; }
 
-  .status-bar {
+  .hud-stats {
     display: flex;
-    gap: 24px;
-    font-size: 12px;
+    gap: 20px;
     font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
   }
-  .status-item { color: var(--dim); }
-  .status-item b { color: var(--cyan); font-weight: normal; }
+  .hud-stat { color: var(--dim); }
+  .hud-stat b { font-weight: normal; }
+  .hud-stat b.hi   { color: var(--green); }
+  .hud-stat b.med  { color: var(--yellow); }
+  .hud-stat b.low  { color: var(--red); }
+  .hud-stat b.path { color: var(--orange); }
+  .hud-stat b.cyan { color: var(--cyan); }
 
-  .blink {
-    display: inline-block;
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--green);
-    margin-right: 6px;
-    animation: blink 1.2s infinite;
-  }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+  .blink { display:inline-block; width:6px; height:6px; border-radius:50%;
+           background:var(--green); margin-right:5px;
+           animation: blink 1.4s infinite; }
+  @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.1} }
 
-  /* ── MAIN LAYOUT ── */
-  .main {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
+  /* ── MAIN ── */
+  .main { display:flex; flex:1; overflow:hidden; }
 
   /* ── SIDEBAR ── */
   .sidebar {
-    width: 220px;
+    width: 210px;
     background: var(--panel);
     border-right: 1px solid var(--border);
     display: flex;
@@ -90,898 +85,866 @@
     overflow-y: auto;
   }
 
-  .sidebar-section {
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border);
-  }
-  .sidebar-section h3 {
-    font-size: 10px;
-    letter-spacing: 2px;
+  .s-section { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .s-section h3 {
+    font-size: 9px;
+    letter-spacing: 2.5px;
     color: var(--dim);
     text-transform: uppercase;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
-  .control-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    padding: 8px 10px;
-    margin-bottom: 6px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    color: var(--white);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-    text-align: left;
+  .btn {
+    display: flex; align-items: center; gap: 7px;
+    width: 100%; padding: 7px 9px; margin-bottom: 5px;
+    background: transparent; border: 1px solid var(--border);
+    border-radius: 3px; color: var(--text);
+    font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; text-align: left;
   }
-  .control-btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.05); }
-  .control-btn.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.08); }
-  .control-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(255,59,92,0.05); }
-
-  .control-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .btn:hover { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.05); }
+  .btn.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.07); }
+  .btn.danger:hover { border-color: var(--red); color: var(--red); }
+  .btn svg { width:13px; height:13px; flex-shrink:0; }
 
   /* Layers */
-  .layer-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 0;
-  }
-  .layer-item label { font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-  .layer-dot { width: 8px; height: 8px; border-radius: 2px; }
+  .layer { display:flex; align-items:center; justify-content:space-between; padding:5px 0; }
+  .layer label { font-size:12px; cursor:pointer; display:flex; align-items:center; gap:7px; }
+  .dot { width:8px; height:8px; border-radius:2px; flex-shrink:0; }
 
-  .toggle {
-    position: relative;
-    width: 30px; height: 16px;
-  }
-  .toggle input { opacity: 0; width: 0; height: 0; }
-  .toggle-slider {
-    position: absolute; inset: 0;
-    background: var(--border);
-    border-radius: 8px;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  .toggle-slider::before {
-    content: '';
-    position: absolute;
-    width: 10px; height: 10px;
-    left: 3px; top: 3px;
-    background: var(--dim);
-    border-radius: 50%;
-    transition: 0.2s;
-  }
-  .toggle input:checked + .toggle-slider { background: rgba(0,229,255,0.25); }
-  .toggle input:checked + .toggle-slider::before { transform: translateX(14px); background: var(--cyan); }
+  .tog { position:relative; width:28px; height:15px; }
+  .tog input { opacity:0; width:0; height:0; }
+  .tog-sl { position:absolute; inset:0; background:var(--border); border-radius:8px; cursor:pointer; transition:.2s; }
+  .tog-sl::before { content:''; position:absolute; width:9px; height:9px;
+    left:3px; top:3px; background:var(--dim); border-radius:50%; transition:.2s; }
+  .tog input:checked+.tog-sl { background:rgba(0,229,255,.2); }
+  .tog input:checked+.tog-sl::before { transform:translateX(13px); background:var(--cyan); }
 
-  /* Zoom slider */
-  .zoom-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 4px;
-  }
-  .zoom-row span { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--cyan); width: 38px; text-align: right; }
-  input[type=range] {
-    flex: 1;
-    -webkit-appearance: none;
-    height: 2px;
-    background: var(--border);
-    border-radius: 2px;
-    outline: none;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px; height: 12px;
-    border-radius: 50%;
-    background: var(--cyan);
-    cursor: pointer;
-    border: 2px solid var(--bg);
-  }
+  /* Sliders */
+  .sl-row { display:flex; align-items:center; gap:8px; margin:6px 0; }
+  .sl-row span { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--cyan); width:32px; text-align:right; }
+  input[type=range] { flex:1; -webkit-appearance:none; height:2px;
+    background:var(--border); border-radius:2px; outline:none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:11px; height:11px;
+    border-radius:50%; background:var(--cyan); cursor:pointer; border:2px solid var(--bg); }
 
-  /* Waypoints list */
-  .wp-list { max-height: 160px; overflow-y: auto; }
-  .wp-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 5px 0;
-    border-bottom: 1px solid var(--border);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-  }
-  .wp-item:last-child { border-bottom: none; }
-  .wp-label { color: var(--waypoint); }
-  .wp-coords { color: var(--dim); }
-  .wp-del {
-    background: none;
-    border: none;
-    color: var(--danger);
-    cursor: pointer;
-    font-size: 13px;
-    padding: 0 4px;
-    line-height: 1;
-  }
-  .wp-del:hover { color: #ff6b85; }
+  /* Waypoints */
+  .wp-list { max-height:130px; overflow-y:auto; }
+  .wp-item { display:flex; align-items:center; justify-content:space-between;
+    padding:4px 0; border-bottom:1px solid var(--border);
+    font-family:'Share Tech Mono',monospace; font-size:10px; }
+  .wp-item:last-child { border-bottom:none; }
+  .wp-lbl { color: var(--yellow); }
+  .wp-coords { color: var(--dim); font-size:9px; }
+  .wp-del { background:none; border:none; color:var(--red); cursor:pointer; padding:0 3px; }
+  .empty-msg { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--dim); padding:4px 0; }
 
-  .empty-msg { font-size: 11px; color: var(--dim); font-family: 'Share Tech Mono', monospace; padding: 6px 0; }
+  /* Legenda */
+  .legend-item { display:flex; align-items:center; gap:8px; padding:3px 0;
+    font-family:'Share Tech Mono',monospace; font-size:10px; }
 
-  /* ── MAP AREA ── */
-  .map-area {
+  /* ── VIEWPORT 3D ── */
+  .viewport {
     flex: 1;
     position: relative;
     overflow: hidden;
-    cursor: crosshair;
-    background:
-      radial-gradient(ellipse at 50% 50%, rgba(0,229,255,0.03) 0%, transparent 70%),
-      var(--bg);
-  }
-
-  canvas#mapCanvas {
-    position: absolute;
-    top: 0; left: 0;
-    image-rendering: pixelated;
-  }
-
-  /* Crosshair coords tooltip */
-  #coordTooltip {
-    position: absolute;
-    background: rgba(13,13,15,0.92);
-    border: 1px solid var(--border);
-    padding: 5px 10px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    color: var(--cyan);
-    border-radius: 3px;
-    pointer-events: none;
-    display: none;
-    white-space: nowrap;
-    z-index: 10;
-  }
-
-  /* ── BOTTOM BAR ── */
-  footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 7px 20px;
-    border-top: 1px solid var(--border);
-    background: var(--panel);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    color: var(--dim);
-    flex-shrink: 0;
-  }
-  footer b { color: var(--white); font-weight: normal; }
-
-  /* Import area */
-  #dropZone {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    z-index: 5;
     background: var(--bg);
   }
-  #dropZone.hidden { display: none; }
-  #dropZone .icon { font-size: 48px; opacity: 0.3; }
-  #dropZone p { color: var(--dim); font-size: 14px; }
-  #dropZone .hint { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--dim); opacity: 0.5; }
-  #fileInput { display: none; }
-  .import-btn {
-    padding: 10px 24px;
-    border: 1px solid var(--cyan);
-    background: transparent;
-    color: var(--cyan);
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    cursor: pointer;
-    border-radius: 3px;
-    transition: all 0.15s;
-  }
-  .import-btn:hover { background: rgba(0,229,255,0.1); }
 
-  /* Context menu */
+  #threeCanvas { position:absolute; top:0; left:0; width:100%; height:100%; }
+
+  /* Drop zone */
+  #dropZone {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px;
+    background: var(--bg); z-index: 5;
+  }
+  #dropZone.hidden { display:none; }
+  #dropZone .icon { font-size:52px; opacity:.25; }
+  #dropZone p { color:var(--dim); font-size:14px; }
+  #dropZone small { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--dim); opacity:.5; }
+  .import-btn {
+    padding: 9px 22px; border:1px solid var(--cyan); background:transparent;
+    color:var(--cyan); font-family:'Rajdhani',sans-serif; font-size:14px; font-weight:700;
+    letter-spacing:2px; cursor:pointer; border-radius:3px; transition:all .15s;
+  }
+  .import-btn:hover { background: rgba(0,229,255,.1); }
+  .import-btn.demo { border-color:var(--orange); color:var(--orange); }
+  .import-btn.demo:hover { background: rgba(255,87,34,.1); }
+
+  /* Tooltip coords */
+  #coordTooltip {
+    position: absolute; background: rgba(8,11,16,.9);
+    border: 1px solid var(--border); padding: 4px 10px;
+    font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--cyan);
+    border-radius:3px; pointer-events:none; display:none; z-index:10; white-space:nowrap;
+  }
+
+  /* Waypoint 3D marker label */
+  #wpOverlay { position:absolute; top:0; left:0; pointer-events:none; z-index:8; }
+
+  /* Controls hint */
+  .controls-hint {
+    position: absolute; bottom: 12px; right: 14px;
+    font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--dim);
+    text-align: right; line-height: 1.7; z-index: 6;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:6px 20px; border-top:1px solid var(--border);
+    background:var(--panel); font-family:'Share Tech Mono',monospace;
+    font-size:10px; color:var(--dim); flex-shrink:0;
+  }
+  footer b { color:var(--text); font-weight:normal; }
+
+  #fileInput { display:none; }
+
+  /* ctx menu */
   #ctxMenu {
-    position: fixed;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 4px 0;
-    z-index: 100;
-    display: none;
-    min-width: 160px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    position:fixed; background:var(--panel); border:1px solid var(--border);
+    border-radius:4px; padding:4px 0; z-index:100; display:none; min-width:150px;
+    box-shadow:0 8px 24px rgba(0,0,0,.6);
   }
-  .ctx-item {
-    padding: 8px 14px;
-    font-size: 13px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: background 0.1s;
-  }
-  .ctx-item:hover { background: rgba(255,255,255,0.05); }
-  .ctx-item.waypoint { color: var(--waypoint); }
-  .ctx-item.danger { color: var(--danger); }
-  .ctx-sep { border-bottom: 1px solid var(--border); margin: 3px 0; }
+  .ctx-item { padding:7px 13px; font-size:12px; cursor:pointer;
+    display:flex; align-items:center; gap:7px; transition:background .1s; }
+  .ctx-item:hover { background:rgba(255,255,255,.05); }
+  .ctx-item.wp { color:var(--yellow); }
+  .ctx-sep { border-bottom:1px solid var(--border); margin:3px 0; }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header>
-  <div class="logo"><span>//</span> PIONEER 3-DX <span>//</span> MAPA INTERATIVO <span>// v2.0</span></div>
-  <div class="status-bar">
-    <div class="status-item"><span class="blink"></span>LIVE</div>
-    <div class="status-item">ALTA: <b id="statObstHigh">0</b></div>
-    <div class="status-item">MÉDIA: <b id="statObstMed">0</b></div>
-    <div class="status-item">BAIXA: <b id="statObstLow">0</b></div>
-    <div class="status-item">TRILHA: <b id="statTrail">0</b></div>
-    <div class="status-item">WAYPOINTS: <b id="statWp">0</b></div>
-    <div class="status-item">ZOOM: <b id="statZoom">1.0×</b></div>
+  <div class="logo"><em>//</em> PIONEER 3-DX <em>//</em> MAPA 3D INTERATIVO <em>// v3.0</em></div>
+  <div class="hud-stats">
+    <div class="hud-stat"><span class="blink"></span>LIVE</div>
+    <div class="hud-stat">ALTA: <b class="hi" id="sHi">0</b></div>
+    <div class="hud-stat">MÉDIA: <b class="med" id="sMed">0</b></div>
+    <div class="hud-stat">BAIXA: <b class="low" id="sLow">0</b></div>
+    <div class="hud-stat">TRILHA: <b class="path" id="sPath">0</b></div>
+    <div class="hud-stat">WP: <b class="cyan" id="sWp">0</b></div>
+    <div class="hud-stat">ZOOM: <b class="cyan" id="sZoom">—</b></div>
   </div>
 </header>
 
 <div class="main">
-
-  <!-- SIDEBAR -->
   <aside class="sidebar">
 
-    <!-- Import -->
-    <div class="sidebar-section">
+    <div class="s-section">
       <h3>Dados</h3>
-      <button class="control-btn" onclick="document.getElementById('fileInput').click()">
+      <button class="btn" onclick="document.getElementById('fileInput').click()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        Importar JSON
+        Importar JSON 3D
       </button>
-      <button class="control-btn" onclick="loadDemo()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
-        Carregar Demo
+      <button class="btn" onclick="loadDemo()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Ver Demo 3D
       </button>
-      <button class="control-btn danger" onclick="clearMap()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-        Limpar Mapa
-      </button>
-    </div>
-
-    <!-- Ferramentas -->
-    <div class="sidebar-section">
-      <h3>Ferramenta</h3>
-      <button class="control-btn active" id="toolPan" onclick="setTool('pan')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 00-2-2v0a2 2 0 00-2 2v0M14 10V4a2 2 0 00-2-2v0a2 2 0 00-2 2v0M10 10.5V6a2 2 0 00-2-2v0a2 2 0 00-2 2v5"/><path d="M6 14l-1.5-1.5a2 2 0 00-2.83 2.83L5 18c1.36 1.36 2.9 2 5 2h2a5 5 0 005-5v-2a2 2 0 00-2-2v0a2 2 0 00-2 2"/></svg>
-        Mover (Pan)
-      </button>
-      <button class="control-btn" id="toolWaypoint" onclick="setTool('waypoint')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Marcar Waypoint
+      <button class="btn danger" onclick="clearScene()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+        Limpar Cena
       </button>
     </div>
 
-    <!-- Zoom -->
-    <div class="sidebar-section">
-      <h3>Zoom</h3>
-      <div class="zoom-row">
-        <input type="range" id="zoomSlider" min="0.5" max="8" step="0.1" value="2"
-          oninput="setZoom(parseFloat(this.value))">
-        <span id="zoomVal">2.0×</span>
+    <div class="s-section">
+      <h3>Câmera</h3>
+      <button class="btn active" id="btnOrbit" onclick="setCamMode('orbit')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+        Orbital (arrastar)
+      </button>
+      <button class="btn" id="btnTop" onclick="setCamPreset('top')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Vista Superior
+      </button>
+      <button class="btn" id="btnIso" onclick="setCamPreset('iso')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        Vista Isométrica
+      </button>
+      <button class="btn" onclick="resetCamera()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 109-9M3 3v6h6"/></svg>
+        Resetar Câmera
+      </button>
+    </div>
+
+    <div class="s-section">
+      <h3>Altura das Paredes</h3>
+      <div class="sl-row">
+        <input type="range" id="heightSlider" min="0.1" max="5" step="0.1" value="0.5"
+          oninput="setWallHeight(parseFloat(this.value))">
+        <span id="heightVal">0.5m</span>
       </div>
-      <div style="display:flex; gap:6px; margin-top:10px;">
-        <button class="control-btn" style="flex:1;justify-content:center" onclick="zoomBy(0.5)">−</button>
-        <button class="control-btn" style="flex:1;justify-content:center" onclick="zoomBy(-0.5)">+</button>
-        <button class="control-btn" style="flex:1;justify-content:center" onclick="resetView()">⌂</button>
-      </div>
     </div>
 
-    <!-- Layers -->
-    <div class="sidebar-section">
+    <div class="s-section">
       <h3>Camadas</h3>
-      <div class="layer-item">
-        <label for="layerObstHigh">
-          <span class="layer-dot" style="background:#00ff00"></span>Alta Certeza
-        </label>
-        <label class="toggle"><input type="checkbox" id="layerObstHigh" checked onchange="render()"><span class="toggle-slider"></span></label>
+      <div class="layer">
+        <label><span class="dot" style="background:var(--green)"></span>Alta Certeza</label>
+        <label class="tog"><input type="checkbox" id="lHi" checked onchange="toggleLayer('hi')"><span class="tog-sl"></span></label>
       </div>
-      <div class="layer-item">
-        <label for="layerObstMed">
-          <span class="layer-dot" style="background:#ffff00"></span>Média Certeza
-        </label>
-        <label class="toggle"><input type="checkbox" id="layerObstMed" checked onchange="render()"><span class="toggle-slider"></span></label>
+      <div class="layer">
+        <label><span class="dot" style="background:var(--yellow)"></span>Média Certeza</label>
+        <label class="tog"><input type="checkbox" id="lMed" checked onchange="toggleLayer('med')"><span class="tog-sl"></span></label>
       </div>
-      <div class="layer-item">
-        <label for="layerObstLow">
-          <span class="layer-dot" style="background:#ff3b5c"></span>Baixa Certeza
-        </label>
-        <label class="toggle"><input type="checkbox" id="layerObstLow" checked onchange="render()"><span class="toggle-slider"></span></label>
+      <div class="layer">
+        <label><span class="dot" style="background:var(--red)"></span>Baixa Certeza</label>
+        <label class="tog"><input type="checkbox" id="lLow" checked onchange="toggleLayer('low')"><span class="tog-sl"></span></label>
       </div>
-      <div class="layer-item">
-        <label for="layerTrail">
-          <span class="layer-dot" style="background:var(--orange)"></span>Trilha
-        </label>
-        <label class="toggle"><input type="checkbox" id="layerTrail" checked onchange="render()"><span class="toggle-slider"></span></label>
+      <div class="layer">
+        <label><span class="dot" style="background:var(--orange)"></span>Trilha</label>
+        <label class="tog"><input type="checkbox" id="lPath" checked onchange="toggleLayer('path')"><span class="tog-sl"></span></label>
       </div>
-      <div class="layer-item">
-        <label for="layerGrid">
-          <span class="layer-dot" style="background:var(--dim)"></span>Grade
-        </label>
-        <label class="toggle"><input type="checkbox" id="layerGrid" checked onchange="render()"><span class="toggle-slider"></span></label>
+      <div class="layer">
+        <label><span class="dot" style="background:var(--yellow)"></span>Waypoints</label>
+        <label class="tog"><input type="checkbox" id="lWp" checked onchange="toggleLayer('wp')"><span class="tog-sl"></span></label>
       </div>
-      <div class="layer-item">
-        <label for="layerWp">
-          <span class="layer-dot" style="background:var(--waypoint)"></span>Waypoints
-        </label>
-        <label class="toggle"><input type="checkbox" id="layerWp" checked onchange="render()"><span class="toggle-slider"></span></label>
+      <div class="layer">
+        <label><span class="dot" style="background:var(--border)"></span>Plano de Chão</label>
+        <label class="tog"><input type="checkbox" id="lFloor" checked onchange="toggleLayer('floor')"><span class="tog-sl"></span></label>
       </div>
     </div>
 
-    <!-- Legenda de Certeza -->
-    <div class="sidebar-section">
-      <h3>Legenda de Certeza</h3>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;line-height:2;">
-        <div><span style="color:#00ff00">■</span> Alta &nbsp;&nbsp;(sinal ≥ 950)</div>
-        <div><span style="color:#ffff00">■</span> Média &nbsp;(sinal ≥ 875)</div>
-        <div><span style="color:#ff3b5c">■</span> Baixa &nbsp;(sinal ≥ 800)</div>
-        <div><span style="color:#ff5722">■</span> Trilha percorrida</div>
-      </div>
+    <div class="s-section">
+      <h3>Legenda</h3>
+      <div class="legend-item"><span class="dot" style="background:var(--green)"></span> Alta &nbsp;≥ 950</div>
+      <div class="legend-item"><span class="dot" style="background:var(--yellow)"></span> Média ≥ 875</div>
+      <div class="legend-item"><span class="dot" style="background:var(--red)"></span> Baixa ≥ 800</div>
+      <div class="legend-item"><span class="dot" style="background:var(--orange)"></span> Trilha</div>
     </div>
 
-    <!-- Waypoints -->
-    <div class="sidebar-section" style="flex:1">
-      <h3>Waypoints</h3>
+    <div class="s-section" style="flex:1">
+      <h3>Waypoints 3D</h3>
       <div class="wp-list" id="wpList">
-        <div class="empty-msg">Nenhum waypoint ainda.<br>Use a ferramenta ou clique com botão direito.</div>
+        <div class="empty-msg">Nenhum waypoint.<br>Botão direito no mapa.</div>
       </div>
-      <button class="control-btn danger" style="margin-top:10px" onclick="clearWaypoints()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        Limpar Waypoints
-      </button>
-      <button class="control-btn" style="margin-top:4px" onclick="exportWaypoints()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Exportar Waypoints
-      </button>
+      <button class="btn danger" style="margin-top:8px" onclick="clearWaypoints()">Limpar WPs</button>
+      <button class="btn" style="margin-top:4px" onclick="exportWaypoints()">Exportar WPs</button>
     </div>
 
   </aside>
 
-  <!-- MAP -->
-  <div class="map-area" id="mapArea">
-
-    <!-- Drop zone / initial state -->
+  <div class="viewport" id="viewport">
     <div id="dropZone">
       <div class="icon">🗺️</div>
-      <p>Nenhum mapa carregado</p>
-      <button class="import-btn" onclick="document.getElementById('fileInput').click()">IMPORTAR MAPA JSON</button>
-      <button class="import-btn" style="border-color:var(--orange);color:var(--orange)" onclick="loadDemo()">VER DEMONSTRAÇÃO</button>
-      <p class="hint">Arraste um arquivo .json aqui ou use o botão acima</p>
+      <p>Nenhum mapa 3D carregado</p>
+      <button class="import-btn" onclick="document.getElementById('fileInput').click()">IMPORTAR JSON 3D</button>
+      <button class="import-btn demo" onclick="loadDemo()">VER DEMONSTRAÇÃO 3D</button>
+      <small>Arraste map_export_3d.json aqui</small>
     </div>
-
-    <canvas id="mapCanvas"></canvas>
+    <canvas id="threeCanvas"></canvas>
+    <canvas id="wpOverlay"></canvas>
     <div id="coordTooltip"></div>
-
-    <!-- Context menu -->
-    <div id="ctxMenu">
-      <div class="ctx-item waypoint" onclick="ctxAddWaypoint()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Adicionar Waypoint
-      </div>
-      <div class="ctx-sep"></div>
-      <div class="ctx-item" onclick="resetView()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
-        Centralizar Mapa
-      </div>
-      <div class="ctx-item" onclick="zoomBy(-1)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
-        Zoom In
-      </div>
-      <div class="ctx-item" onclick="zoomBy(1)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/><line x1="11" y1="8" x2="11" y2="14"/></svg>
-        Zoom Out
-      </div>
+    <div class="controls-hint">
+      LMB drag → rotacionar<br>
+      RMB drag → pan<br>
+      Scroll → zoom<br>
+      RMB click → waypoint
     </div>
-
   </div>
 </div>
 
-<!-- FOOTER -->
 <footer>
-  <span>MOUSE: <b id="footCoords">—</b></span>
-  <span>WORLD: <b id="footWorld">—</b></span>
-  <span id="footMode">MODO: PAN</span>
-  <span>Pioneer 3-DX Interactive Map — <b>Webots Export</b></span>
+  <span>POS: <b id="fPos">—</b></span>
+  <span>WORLD: <b id="fWorld">—</b></span>
+  <span>CÂMERA: <b id="fCam">—</b></span>
+  <span>Pioneer 3-DX 3D Map — Three.js</span>
 </footer>
+
+<div id="ctxMenu">
+  <div class="ctx-item wp" onclick="ctxAddWp()">📍 Adicionar Waypoint 3D</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="setCamPreset('top')">⬆ Vista Superior</div>
+  <div class="ctx-item" onclick="setCamPreset('iso')">◈ Vista Isométrica</div>
+  <div class="ctx-item" onclick="resetCamera()">↺ Resetar Câmera</div>
+</div>
 
 <input type="file" id="fileInput" accept=".json" onchange="loadFile(this)">
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  CONSTANTES DO PROTOCOLO (devem bater com o código C)
+// ══════════════════════════════════════════════════════════════
+const VAL_PATH      = 2;
+const OBS_LOW_CONF  = 10;
+const OBS_MED_CONF  = 20;
+const OBS_HIGH_CONF = 30;
+
+const COLORS = {
+  [VAL_PATH]:      0xff5722,
+  [OBS_LOW_CONF]:  0xff3d5a,
+  [OBS_MED_CONF]:  0xffd600,
+  [OBS_HIGH_CONF]: 0x00ff6a,
+};
+
+// ══════════════════════════════════════════════════════════════
 //  STATE
-// ════════════════════════════════════════════════════
-// MAP_SIZE e CELL_METERS são definidos dinamicamente ao carregar o JSON
-let MAP_SIZE = 200;
-let CELL_METERS = 1/30;
-
-let mapGrid = new Uint8Array(MAP_SIZE * MAP_SIZE); // 0=empty, 1=obstacle, 2=trail
-let waypoints = [];
-let zoom = 2;
-let panX = 0, panY = 0;
-let tool = 'pan';
-let isDragging = false;
-let dragStartX, dragStartY, panStartX, panStartY;
-let ctxPos = { x: 0, y: 0 };
+// ══════════════════════════════════════════════════════════════
+let MAP_SIZE  = 1000;
+let MAP_SCALE = 30.0;
+let wallHeight = 0.5;
 let hasMap = false;
+let waypoints = [];
+let ctxPoint  = new THREE.Vector3();
 
-const canvas = document.getElementById('mapCanvas');
-const ctx = canvas.getContext('2d');
-const area = document.getElementById('mapArea');
-const tooltip = document.getElementById('coordTooltip');
-const ctxMenu = document.getElementById('ctxMenu');
+// Layers: grupos Three.js
+const layers = {};
 
-// ════════════════════════════════════════════════════
-//  INIT
-// ════════════════════════════════════════════════════
-function init() {
-  resize();
-  window.addEventListener('resize', resize);
-  setupEvents();
+// ══════════════════════════════════════════════════════════════
+//  THREE.JS SETUP
+// ══════════════════════════════════════════════════════════════
+const viewport  = document.getElementById('viewport');
+const canvas    = document.getElementById('threeCanvas');
+const renderer  = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color(0x080b10);
+scene.fog = new THREE.FogExp2(0x080b10, 0.008);
+
+const camera = new THREE.PerspectiveCamera(50, 1, 0.01, 2000);
+camera.position.set(0, 40, 60);
+camera.lookAt(0, 0, 0);
+
+// Luzes
+const ambient = new THREE.AmbientLight(0x1a2a40, 0.8);
+scene.add(ambient);
+
+const dirLight = new THREE.DirectionalLight(0x00e5ff, 0.6);
+dirLight.position.set(50, 100, 50);
+dirLight.castShadow = true;
+scene.add(dirLight);
+
+const pointLight = new THREE.PointLight(0x00ff6a, 0.4, 200);
+pointLight.position.set(0, 30, 0);
+scene.add(pointLight);
+
+// Grid helper (plano de referência)
+const gridHelper = new THREE.GridHelper(200, 40, 0x1a2235, 0x111825);
+scene.add(gridHelper);
+layers['floor'] = gridHelper;
+
+// Grupos de camadas
+['hi','med','low','path','wp'].forEach(k => {
+  layers[k] = new THREE.Group();
+  scene.add(layers[k]);
+});
+
+// ══════════════════════════════════════════════════════════════
+//  ORBIT CONTROLS (implementação manual)
+// ══════════════════════════════════════════════════════════════
+let orbitState = { active:false, button:-1,
+  lastX:0, lastY:0,
+  theta:0.4, phi:1.0, radius:80,
+  target: new THREE.Vector3(0,0,0),
+  panX:0, panY:0 };
+
+function updateCamera() {
+  const t = orbitState;
+  camera.position.x = t.target.x + t.radius * Math.sin(t.phi) * Math.sin(t.theta);
+  camera.position.y = t.target.y + t.radius * Math.cos(t.phi);
+  camera.position.z = t.target.z + t.radius * Math.sin(t.phi) * Math.cos(t.theta);
+  camera.lookAt(t.target);
+  document.getElementById('sZoom').textContent = t.radius.toFixed(0) + 'u';
+  document.getElementById('fCam').textContent =
+    `θ${(t.theta*180/Math.PI).toFixed(0)}° φ${(t.phi*180/Math.PI).toFixed(0)}° r${t.radius.toFixed(0)}`;
 }
 
-function resize() {
-  canvas.width = area.clientWidth;
-  canvas.height = area.clientHeight;
-  render();
-}
+canvas.addEventListener('mousedown', e => {
+  orbitState.active = true;
+  orbitState.button = e.button;
+  orbitState.lastX  = e.clientX;
+  orbitState.lastY  = e.clientY;
+});
 
-// ════════════════════════════════════════════════════
-//  RENDER
-// ════════════════════════════════════════════════════
-function render() {
-  const W = canvas.width, H = canvas.height;
-  ctx.clearRect(0, 0, W, H);
-  if (!hasMap) return;
+window.addEventListener('mousemove', e => {
+  if (!orbitState.active) return;
+  const dx = e.clientX - orbitState.lastX;
+  const dy = e.clientY - orbitState.lastY;
+  orbitState.lastX = e.clientX;
+  orbitState.lastY = e.clientY;
 
-  const showGrid  = document.getElementById('layerGrid').checked;
-  const showObst  = document.getElementById('layerObst') ? document.getElementById('layerObst').checked : false;
-  const showTrail = document.getElementById('layerTrail').checked;
-  const showWp    = document.getElementById('layerWp').checked;
-
-  const cellSize = zoom;
-  const offsetX = panX + W/2 - (MAP_SIZE/2)*cellSize;
-  const offsetY = panY + H/2 - (MAP_SIZE/2)*cellSize;
-
-  // Background
-  ctx.fillStyle = '#0d0d0f';
-  ctx.fillRect(0, 0, W, H);
-
-  // Grid
-  if (showGrid && cellSize > 3) {
-    ctx.strokeStyle = '#1e2235';
-    ctx.lineWidth = 0.5;
-    const step = Math.max(1, Math.round(10 / cellSize)) * cellSize;
-    const startX = ((offsetX % step) + step) % step;
-    const startY = ((offsetY % step) + step) % step;
-    ctx.beginPath();
-    for (let x = startX; x < W; x += step) { ctx.moveTo(x, 0); ctx.lineTo(x, H); }
-    for (let y = startY; y < H; y += step) { ctx.moveTo(0, y); ctx.lineTo(W, y); }
-    ctx.stroke();
+  if (orbitState.button === 0) {
+    // LMB: rotar
+    orbitState.theta -= dx * 0.005;
+    orbitState.phi    = Math.max(0.05, Math.min(Math.PI - 0.05, orbitState.phi + dy * 0.005));
+  } else if (orbitState.button === 2) {
+    // RMB: pan
+    const right = new THREE.Vector3();
+    const up    = new THREE.Vector3(0,1,0);
+    right.crossVectors(camera.getWorldDirection(new THREE.Vector3()), up).normalize();
+    orbitState.target.addScaledVector(right, -dx * orbitState.radius * 0.001);
+    orbitState.target.y += dy * orbitState.radius * 0.001;
   }
+  updateCamera();
+});
 
-  // Valores do novo protocolo:
-  // 2  = trilha (VAL_PATH)
-  // 10 = baixa certeza (OBS_LOW_CONF)  → vermelho
-  // 20 = média certeza (OBS_MED_CONF)  → amarelo
-  // 30 = alta certeza (OBS_HIGH_CONF)  → verde
-  // Legado: 1 = obstáculo ciano (versões antigas)
-  const showObstHigh = document.getElementById('layerObstHigh') ? document.getElementById('layerObstHigh').checked : true;
-  const showObstMed  = document.getElementById('layerObstMed')  ? document.getElementById('layerObstMed').checked  : true;
-  const showObstLow  = document.getElementById('layerObstLow')  ? document.getElementById('layerObstLow').checked  : true;
+window.addEventListener('mouseup', () => { orbitState.active = false; });
 
-  let obstHigh = 0, obstMed = 0, obstLow = 0, trailCount = 0;
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  orbitState.radius = Math.max(2, Math.min(500, orbitState.radius + e.deltaY * 0.1));
+  updateCamera();
+}, { passive:false });
 
-  for (let gx = 0; gx < MAP_SIZE; gx++) {
-    for (let gy = 0; gy < MAP_SIZE; gy++) {
-      const val = mapGrid[gx * MAP_SIZE + gy];
-      if (val === 0) continue;
-      const px = offsetX + gx * cellSize;
-      const py = offsetY + gy * cellSize;
-      if (px + cellSize < 0 || px > W || py + cellSize < 0 || py > H) continue;
+// ══════════════════════════════════════════════════════════════
+//  CÂMERA PRESETS
+// ══════════════════════════════════════════════════════════════
+function setCamMode(m) {
+  document.getElementById('btnOrbit').classList.toggle('active', m==='orbit');
+}
 
-      const s = Math.max(cellSize, 2);
+function setCamPreset(p) {
+  if (p === 'top') {
+    orbitState.phi    = 0.01;
+    orbitState.theta  = 0;
+    orbitState.radius = 100;
+  } else if (p === 'iso') {
+    orbitState.phi    = 0.9;
+    orbitState.theta  = 0.8;
+    orbitState.radius = 90;
+  }
+  updateCamera();
+}
 
-      if (val === 2 && showTrail) {
-        // Trilha laranja
-        trailCount++;
-        ctx.fillStyle = '#ff5722';
-        ctx.fillRect(px, py, Math.max(cellSize * 0.6, 1), Math.max(cellSize * 0.6, 1));
+function resetCamera() {
+  orbitState.theta  = 0.4;
+  orbitState.phi    = 1.0;
+  orbitState.radius = 80;
+  orbitState.target.set(0,0,0);
+  updateCamera();
+}
 
-      } else if (val === 30 && showObstHigh) {
-        // Alta certeza — verde
-        obstHigh++;
-        ctx.fillStyle = '#00ff00';
-        ctx.shadowColor = '#00ff00';
-        ctx.shadowBlur = cellSize > 3 ? 5 : 0;
-        ctx.fillRect(px, py, s, s);
-        ctx.shadowBlur = 0;
+// ══════════════════════════════════════════════════════════════
+//  RAYCASTER — hover e context menu
+// ══════════════════════════════════════════════════════════════
+const raycaster = new THREE.Raycaster();
+const mouse     = new THREE.Vector2();
+const floorPlane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
+const tooltip    = document.getElementById('coordTooltip');
 
-      } else if (val === 20 && showObstMed) {
-        // Média certeza — amarelo
-        obstMed++;
-        ctx.fillStyle = '#ffff00';
-        ctx.shadowColor = '#ffff00';
-        ctx.shadowBlur = cellSize > 3 ? 3 : 0;
-        ctx.fillRect(px, py, s, s);
-        ctx.shadowBlur = 0;
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  mouse.x =  ((e.clientX - rect.left)  / rect.width)  * 2 - 1;
+  mouse.y = -((e.clientY - rect.top)   / rect.height)  * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
 
-      } else if (val === 10 && showObstLow) {
-        // Baixa certeza — vermelho
-        obstLow++;
-        ctx.fillStyle = '#ff3b5c';
-        ctx.shadowColor = '#ff3b5c';
-        ctx.shadowBlur = cellSize > 3 ? 2 : 0;
-        ctx.fillRect(px, py, s, s);
-        ctx.shadowBlur = 0;
+  const pt = new THREE.Vector3();
+  raycaster.ray.intersectPlane(floorPlane, pt);
+  if (pt) {
+    const wx = (pt.x / MAP_SCALE).toFixed(2);
+    const wy = (pt.z / MAP_SCALE).toFixed(2);
+    tooltip.style.left = (e.clientX - rect.left + 12) + 'px';
+    tooltip.style.top  = (e.clientY - rect.top  + 12) + 'px';
+    tooltip.style.display = 'block';
+    tooltip.textContent = `WORLD(${wx}m, ${wy}m, ${pt.y.toFixed(2)}m)`;
+    document.getElementById('fPos').textContent = `${e.clientX},${e.clientY}px`;
+    document.getElementById('fWorld').textContent = `${wx}m, ${wy}m`;
+    ctxPoint.copy(pt);
+  }
+});
 
-      } else if (val === 1 && showObst) {
-        // Legado: obstáculo ciano (JSONs de versões antigas)
-        ctx.fillStyle = '#00e5ff';
-        ctx.shadowColor = '#00e5ff';
-        ctx.shadowBlur = cellSize > 3 ? 4 : 0;
-        ctx.fillRect(px, py, s, s);
-        ctx.shadowBlur = 0;
+canvas.addEventListener('mouseleave', () => { tooltip.style.display='none'; });
+
+// ══════════════════════════════════════════════════════════════
+//  CONTEXT MENU
+// ══════════════════════════════════════════════════════════════
+const ctxMenu = document.getElementById('ctxMenu');
+canvas.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  ctxMenu.style.left = e.clientX + 'px';
+  ctxMenu.style.top  = e.clientY + 'px';
+  ctxMenu.style.display = 'block';
+});
+document.addEventListener('click', () => ctxMenu.style.display = 'none');
+
+// ══════════════════════════════════════════════════════════════
+//  LAYERS (visibilidade)
+// ══════════════════════════════════════════════════════════════
+function toggleLayer(k) {
+  const el = layers[k];
+  if (!el) return;
+  el.visible = document.getElementById('l'+k.charAt(0).toUpperCase()+k.slice(1)).checked;
+}
+
+// Mapeia valor de célula → chave de layer
+function valToLayer(v) {
+  if (v === VAL_PATH)      return 'path';
+  if (v === OBS_LOW_CONF)  return 'low';
+  if (v === OBS_MED_CONF)  return 'med';
+  if (v === OBS_HIGH_CONF) return 'hi';
+  return null;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CONSTRUÇÃO DA CENA 3D
+// ══════════════════════════════════════════════════════════════
+let builtCells = [];   // {mesh, layerKey} para reconstruir ao mudar altura
+
+// ══════════════════════════════════════════════════════════════
+//  ALGORITMO DE AGRUPAMENTO EM SEGMENTOS (Greedy Merging)
+//  Converte células individuais em retângulos contínuos.
+//  Suporta tanto o formato novo {segments:[]} quanto o legado {cells:[]}
+// ══════════════════════════════════════════════════════════════
+
+/*
+ * cellsToSegments()
+ * -----------------
+ * Recebe array de células {x,y,z,v} e retorna segmentos agrupados.
+ * Algoritmo: Greedy Rectangle Merging
+ *   1. Percorre cada linha (x fixo), faz run-length encoding em y
+ *   2. Tenta extender cada run para linhas seguintes (merge vertical)
+ *   3. Marca células consumidas para não duplicar
+ */
+function cellsToSegments(cells) {
+  // Monta grid esparso para acesso O(1)
+  const grid = {};
+  cells.forEach(c => { grid[c.x + ',' + c.y] = c; });
+
+  const visited = new Set();
+  const segments = [];
+
+  cells.forEach(c => {
+    const key = c.x + ',' + c.y;
+    if (visited.has(key)) return;
+
+    // Expande horizontalmente (eixo Y)
+    let y2 = c.y;
+    while (true) {
+      const nk = c.x + ',' + (y2 + 1);
+      const nb = grid[nk];
+      if (nb && nb.v === c.v && !visited.has(nk)) y2++;
+      else break;
+    }
+
+    // Tenta expandir verticalmente (eixo X) o bloco inteiro [y..y2]
+    let x2 = c.x;
+    outer: while (true) {
+      for (let yy = c.y; yy <= y2; yy++) {
+        const nk = (x2 + 1) + ',' + yy;
+        const nb = grid[nk];
+        if (!nb || nb.v !== c.v || visited.has(nk)) break outer;
+      }
+      x2++;
+    }
+
+    // Calcula Z médio do bloco
+    let zSum = 0, zCount = 0;
+    for (let xx = c.x; xx <= x2; xx++) {
+      for (let yy = c.y; yy <= y2; yy++) {
+        const bk = xx + ',' + yy;
+        visited.add(bk);
+        const bc = grid[bk];
+        if (bc && bc.z !== undefined) { zSum += bc.z; zCount++; }
       }
     }
-  }
 
-  // Center crosshair
-  const cx2 = offsetX + (MAP_SIZE/2) * cellSize;
-  const cy2 = offsetY + (MAP_SIZE/2) * cellSize;
-  ctx.strokeStyle = '#3a3f55';
-  ctx.lineWidth = 1;
-  ctx.setLineDash([4, 4]);
-  ctx.beginPath();
-  ctx.moveTo(cx2, 0); ctx.lineTo(cx2, H);
-  ctx.moveTo(0, cy2); ctx.lineTo(W, cy2);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Waypoints
-  if (showWp) {
-    waypoints.forEach((wp, idx) => {
-      const px = offsetX + wp.gx * cellSize;
-      const py = offsetY + wp.gy * cellSize;
-      const r = Math.max(6, cellSize * 1.5);
-      ctx.beginPath();
-      ctx.arc(px, py, r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(255,230,0,0.15)';
-      ctx.fill();
-      ctx.strokeStyle = '#ffe600';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-      // Pin
-      ctx.beginPath();
-      ctx.moveTo(px, py - r);
-      ctx.lineTo(px, py - r - 6);
-      ctx.stroke();
-      // Label
-      ctx.fillStyle = '#ffe600';
-      ctx.font = `bold ${Math.max(10, cellSize)}px 'Share Tech Mono', monospace`;
-      ctx.textAlign = 'center';
-      ctx.fillText(`WP${idx+1}`, px, py - r - 8);
+    segments.push({
+      x1: c.x, y1: c.y,
+      x2, y2,
+      z: zCount > 0 ? zSum / zCount : 0,
+      v: c.v
     });
+  });
+
+  return segments;
+}
+
+function buildScene(data) {
+  // Limpa meshes anteriores
+  builtCells.forEach(({mesh, key}) => layers[key].remove(mesh));
+  builtCells = [];
+
+  // Suporte a ambos os formatos:
+  //   Novo: { segments: [{x1,y1,x2,y2,z,v},...] }  ← exportado pelo C refatorado
+  //   Legado: { cells: [{x,y,z,v},...] }            ← versões antigas
+  let segments;
+  if (data.segments) {
+    segments = data.segments;
+  } else if (data.cells) {
+    // Converte células em segmentos no browser
+    segments = cellsToSegments(data.cells);
+  } else {
+    console.error('JSON sem "segments" nem "cells"'); return;
   }
 
-  // Update stats
-  document.getElementById('statObstHigh').textContent = obstHigh;
-  document.getElementById('statObstMed').textContent  = obstMed;
-  document.getElementById('statObstLow').textContent  = obstLow;
-  document.getElementById('statTrail').textContent    = trailCount;
-  document.getElementById('statWp').textContent    = waypoints.length;
-  document.getElementById('statZoom').textContent  = zoom.toFixed(1) + '×';
-  document.getElementById('zoomVal').textContent   = zoom.toFixed(1) + '×';
-  document.getElementById('zoomSlider').value      = zoom;
+  const CELL = 1.0 / MAP_SCALE;
+  const cx   = MAP_SIZE / 2;
+  const cy   = MAP_SIZE / 2;
+  const GAP  = 0.02; // pequena folga entre segmentos para visual mais nítido
+
+  // Materiais com emissive neon
+  const mats = {
+    [VAL_PATH]:      new THREE.MeshLambertMaterial({ color:0xff5722, transparent:true, opacity:0.55 }),
+    [OBS_LOW_CONF]:  new THREE.MeshLambertMaterial({ color:0xff3d5a, emissive: new THREE.Color(0x330010) }),
+    [OBS_MED_CONF]:  new THREE.MeshLambertMaterial({ color:0xffd600, emissive: new THREE.Color(0x332b00) }),
+    [OBS_HIGH_CONF]: new THREE.MeshLambertMaterial({ color:0x00ff6a, emissive: new THREE.Color(0x003318) }),
+  };
+
+  let hi=0, med=0, low=0, path=0;
+
+  // Bounding box para recentrar câmera
+  let minX=Infinity, maxX=-Infinity, minZ=Infinity, maxZ=-Infinity;
+
+  segments.forEach(seg => {
+    const key = valToLayer(seg.v);
+    if (!key) return;
+
+    // Dimensões do segmento em unidades Three.js
+    const segW = (seg.x2 - seg.x1 + 1) * CELL - GAP; // largura (eixo X do Three)
+    const segD = (seg.y2 - seg.y1 + 1) * CELL - GAP; // profundidade (eixo Z do Three)
+
+    // Centro do segmento
+    const px = ((seg.x1 + seg.x2) / 2 - cx) * CELL;
+    const pz = ((seg.y1 + seg.y2) / 2 - cy) * CELL;
+    const py = seg.z !== undefined ? seg.z : 0;
+
+    minX = Math.min(minX, px); maxX = Math.max(maxX, px);
+    minZ = Math.min(minZ, pz); maxZ = Math.max(maxZ, pz);
+
+    let mesh;
+    if (seg.v === VAL_PATH) {
+      // Trilha: plano raso no chão
+      const geo = new THREE.PlaneGeometry(segW, segD);
+      geo.rotateX(-Math.PI / 2);
+      mesh = new THREE.Mesh(geo, mats[seg.v]);
+      mesh.position.set(px, py + 0.005, pz);
+      path++;
+    } else {
+      // Obstáculo: caixa com altura proporcional ao wallHeight
+      const geo = new THREE.BoxGeometry(segW, 1, segD);
+      mesh = new THREE.Mesh(geo, mats[seg.v]);
+      mesh.scale.y = wallHeight;
+      mesh.position.set(px, py + wallHeight * 0.5, pz);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      if (seg.v === OBS_HIGH_CONF) hi++;
+      else if (seg.v === OBS_MED_CONF) med++;
+      else low++;
+    }
+
+    layers[key].add(mesh);
+    // Guarda referência para atualizar altura depois
+    builtCells.push({ mesh, key, seg, isWall: seg.v !== VAL_PATH });
+  });
+
+  document.getElementById('sHi').textContent   = hi;
+  document.getElementById('sMed').textContent  = med;
+  document.getElementById('sLow').textContent  = low;
+  document.getElementById('sPath').textContent = path;
+
+  // Recentra câmera no centro do mapa
+  if (segments.length > 0 && isFinite(minX)) {
+    orbitState.target.set((minX + maxX) / 2, 0, (minZ + maxZ) / 2);
+    updateCamera();
+  }
 }
 
-// ════════════════════════════════════════════════════
-//  EVENTS
-// ════════════════════════════════════════════════════
-function setupEvents() {
-  // Drag
-  canvas.addEventListener('mousedown', e => {
-    if (e.button === 2) return;
-    if (tool === 'pan') {
-      isDragging = true;
-      dragStartX = e.clientX;
-      dragStartY = e.clientY;
-      panStartX = panX;
-      panStartY = panY;
-      canvas.style.cursor = 'grabbing';
-    } else if (tool === 'waypoint') {
-      const g = screenToGrid(e.offsetX, e.offsetY);
-      addWaypoint(g.gx, g.gy, e.offsetX, e.offsetY);
+function setWallHeight(h) {
+  wallHeight = h;
+  document.getElementById('heightVal').textContent = h.toFixed(1) + 'm';
+  // Atualiza escala Y e posição de todos os segmentos de parede
+  builtCells.forEach(({mesh, isWall, seg}) => {
+    if (isWall) {
+      const py = (seg && seg.z !== undefined) ? seg.z : 0;
+      mesh.scale.y = h;
+      mesh.position.y = py + h * 0.5;
     }
   });
-
-  canvas.addEventListener('mousemove', e => {
-    if (isDragging && tool === 'pan') {
-      panX = panStartX + (e.clientX - dragStartX);
-      panY = panStartY + (e.clientY - dragStartY);
-      render();
-    }
-    // Tooltip
-    const g = screenToGrid(e.offsetX, e.offsetY);
-    const world = gridToWorld(g.gx, g.gy);
-    tooltip.style.left = (e.offsetX + 14) + 'px';
-    tooltip.style.top  = (e.offsetY + 14) + 'px';
-    tooltip.style.display = 'block';
-    tooltip.textContent = `GRID(${g.gx},${g.gy})  WORLD(${world.x.toFixed(2)}m, ${world.y.toFixed(2)}m)`;
-    document.getElementById('footCoords').textContent = `${e.offsetX}, ${e.offsetY}px`;
-    document.getElementById('footWorld').textContent = `${world.x.toFixed(2)}m, ${world.y.toFixed(2)}m`;
-  });
-
-  canvas.addEventListener('mouseup', () => {
-    isDragging = false;
-    canvas.style.cursor = tool === 'pan' ? 'grab' : 'crosshair';
-  });
-
-  canvas.addEventListener('mouseleave', () => {
-    isDragging = false;
-    tooltip.style.display = 'none';
-    document.getElementById('footCoords').textContent = '—';
-    document.getElementById('footWorld').textContent = '—';
-  });
-
-  // Scroll zoom
-  canvas.addEventListener('wheel', e => {
-    e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.3 : 0.3;
-    const oldZoom = zoom;
-    zoom = Math.min(16, Math.max(0.5, zoom + delta));
-    // Zoom toward mouse
-    const mx = e.offsetX, my = e.offsetY;
-    const W = canvas.width, H = canvas.height;
-    panX = mx - W/2 - (mx - W/2 - panX) * (zoom / oldZoom);
-    panY = my - H/2 - (my - H/2 - panY) * (zoom / oldZoom);
-    render();
-  }, { passive: false });
-
-  // Right click context menu
-  canvas.addEventListener('contextmenu', e => {
-    e.preventDefault();
-    ctxPos = { x: e.offsetX, y: e.offsetY };
-    ctxMenu.style.left = e.clientX + 'px';
-    ctxMenu.style.top  = e.clientY + 'px';
-    ctxMenu.style.display = 'block';
-  });
-
-  document.addEventListener('click', () => ctxMenu.style.display = 'none');
-
-  // Drop files
-  area.addEventListener('dragover', e => e.preventDefault());
-  area.addEventListener('drop', e => {
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file) readJSON(file);
-  });
 }
 
-// ════════════════════════════════════════════════════
-//  COORDINATE UTILS
-// ════════════════════════════════════════════════════
-function screenToGrid(sx, sy) {
-  const W = canvas.width, H = canvas.height;
-  const cellSize = zoom;
-  const offsetX = panX + W/2 - (MAP_SIZE/2)*cellSize;
-  const offsetY = panY + H/2 - (MAP_SIZE/2)*cellSize;
-  return {
-    gx: Math.floor((sx - offsetX) / cellSize),
-    gy: Math.floor((sy - offsetY) / cellSize)
-  };
+// ══════════════════════════════════════════════════════════════
+//  WAYPOINTS 3D
+// ══════════════════════════════════════════════════════════════
+function ctxAddWp() {
+  addWaypoint3D(ctxPoint.clone());
 }
 
-function gridToWorld(gx, gy) {
-  return {
-    x: (gx - MAP_SIZE/2) * CELL_METERS,
-    y: (gy - MAP_SIZE/2) * CELL_METERS
-  };
+function addWaypoint3D(pos) {
+  const idx = waypoints.length + 1;
+
+  // Esfera amarela
+  const geo  = new THREE.SphereGeometry(0.3, 8, 8);
+  const mat  = new THREE.MeshLambertMaterial({ color:0xffe600, emissive:0x443300 });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.copy(pos);
+  mesh.position.y = Math.max(pos.y, 0) + 0.3;
+
+  // Linha vertical até o chão
+  const lineGeo = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(pos.x, 0, pos.z),
+    new THREE.Vector3(pos.x, mesh.position.y, pos.z)
+  ]);
+  const lineMat = new THREE.LineBasicMaterial({ color:0xffe600, opacity:0.5, transparent:true });
+  const line    = new THREE.Line(lineGeo, lineMat);
+
+  layers['wp'].add(mesh);
+  layers['wp'].add(line);
+
+  const CELL = 1.0 / MAP_SCALE;
+  const cx   = MAP_SIZE / 2;
+  const wx   = (pos.x / CELL / MAP_SCALE + cx / MAP_SIZE).toFixed(2);
+  const wy   = pos.y.toFixed(2);
+  const wz   = (pos.z / CELL / MAP_SCALE + cx / MAP_SIZE).toFixed(2);
+
+  waypoints.push({ idx, pos, mesh, line, wx, wy, wz });
+  updateWpList();
 }
 
-// ════════════════════════════════════════════════════
-//  TOOLS & CONTROLS
-// ════════════════════════════════════════════════════
-function setTool(t) {
-  tool = t;
-  document.getElementById('toolPan').classList.toggle('active', t === 'pan');
-  document.getElementById('toolWaypoint').classList.toggle('active', t === 'waypoint');
-  canvas.style.cursor = t === 'pan' ? 'grab' : 'crosshair';
-  document.getElementById('footMode').textContent = 'MODO: ' + (t === 'pan' ? 'PAN' : 'WAYPOINT');
-}
-
-function setZoom(val) {
-  zoom = val;
-  render();
-}
-
-function zoomBy(delta) {
-  zoom = Math.min(16, Math.max(0.5, zoom - delta));
-  render();
-}
-
-function resetView() {
-  panX = 0; panY = 0; zoom = 2;
-  render();
-}
-
-// ════════════════════════════════════════════════════
-//  WAYPOINTS
-// ════════════════════════════════════════════════════
-function addWaypoint(gx, gy) {
-  if (gx < 0 || gx >= MAP_SIZE || gy < 0 || gy >= MAP_SIZE) return;
-  const world = gridToWorld(gx, gy);
-  waypoints.push({ gx, gy, wx: world.x, wy: world.y });
-  updateWaypointList();
-  render();
-}
-
-function ctxAddWaypoint() {
-  const g = screenToGrid(ctxPos.x, ctxPos.y);
-  addWaypoint(g.gx, g.gy);
-}
-
-function removeWaypoint(idx) {
-  waypoints.splice(idx, 1);
-  updateWaypointList();
-  render();
+function removeWaypoint(i) {
+  const wp = waypoints[i];
+  layers['wp'].remove(wp.mesh);
+  layers['wp'].remove(wp.line);
+  waypoints.splice(i, 1);
+  updateWpList();
 }
 
 function clearWaypoints() {
+  waypoints.forEach(wp => { layers['wp'].remove(wp.mesh); layers['wp'].remove(wp.line); });
   waypoints = [];
-  updateWaypointList();
-  render();
+  updateWpList();
 }
 
-function updateWaypointList() {
+function updateWpList() {
   const list = document.getElementById('wpList');
-  if (waypoints.length === 0) {
-    list.innerHTML = '<div class="empty-msg">Nenhum waypoint ainda.<br>Use a ferramenta ou clique com botão direito.</div>';
+  document.getElementById('sWp').textContent = waypoints.length;
+  if (!waypoints.length) {
+    list.innerHTML = '<div class="empty-msg">Nenhum waypoint.<br>Botão direito no mapa.</div>';
     return;
   }
-  list.innerHTML = waypoints.map((wp, i) => `
+  list.innerHTML = waypoints.map((wp,i) => `
     <div class="wp-item">
-      <span class="wp-label">WP${i+1}</span>
-      <span class="wp-coords">${wp.wx.toFixed(2)},${wp.wy.toFixed(2)}</span>
+      <span class="wp-lbl">WP${wp.idx}</span>
+      <span class="wp-coords">${wp.wx},${wp.wz}<br>z:${wp.wy}</span>
       <button class="wp-del" onclick="removeWaypoint(${i})">✕</button>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
 
 function exportWaypoints() {
-  if (waypoints.length === 0) { alert('Nenhum waypoint para exportar!'); return; }
-  const data = { waypoints: waypoints.map((wp, i) => ({ id: i+1, grid: {x: wp.gx, y: wp.gy}, world: {x: wp.wx, y: wp.wy} })) };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  if (!waypoints.length) { alert('Nenhum waypoint!'); return; }
+  const data = { waypoints: waypoints.map(wp => ({
+    id: wp.idx, world: { x: parseFloat(wp.wx), y: parseFloat(wp.wy), z: parseFloat(wp.wz) }
+  }))};
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'pioneer_waypoints.json';
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  a.download = 'pioneer_waypoints_3d.json';
   a.click();
 }
 
-// ════════════════════════════════════════════════════
-//  MAP DATA
-// ════════════════════════════════════════════════════
-function loadFile(input) {
-  if (input.files[0]) readJSON(input.files[0]);
-}
+// ══════════════════════════════════════════════════════════════
+//  CARGA DE DADOS
+// ══════════════════════════════════════════════════════════════
+function loadFile(input) { if (input.files[0]) readJSON(input.files[0]); }
 
 function readJSON(file) {
   const reader = new FileReader();
   reader.onload = e => {
-    try {
-      const data = JSON.parse(e.target.result);
-      applyMapData(data);
-    } catch(err) {
-      alert('Erro ao ler JSON: ' + err.message);
-    }
+    try { applyData(JSON.parse(e.target.result)); }
+    catch(err) { alert('Erro ao ler JSON: ' + err.message); }
   };
   reader.readAsText(file);
 }
 
-function applyMapData(data) {
-  // Lê MAP_SIZE e MAP_SCALE dinamicamente do JSON
-  // Funciona tanto com map_grid 200x200 quanto global_map 1000x1000
-  if (data.map_size)  MAP_SIZE    = data.map_size;
-  if (data.map_scale) CELL_METERS = 1.0 / data.map_scale;
-
-  mapGrid = new Uint8Array(MAP_SIZE * MAP_SIZE);
-
-  // Suporta dois formatos:
-  // 1. { grid: [[...], [...]] }  (array 2D)
-  // 2. { cells: [{x,y,v},...] }  (lista esparsa — formato do export_map_json)
-  if (data.grid) {
-    for (let x = 0; x < Math.min(data.grid.length, MAP_SIZE); x++) {
-      for (let y = 0; y < Math.min((data.grid[x]||[]).length, MAP_SIZE); y++) {
-        mapGrid[x * MAP_SIZE + y] = data.grid[x][y] || 0;
-      }
-    }
-  } else if (data.cells) {
-    data.cells.forEach(c => {
-      if (c.x >= 0 && c.x < MAP_SIZE && c.y >= 0 && c.y < MAP_SIZE)
-        mapGrid[c.x * MAP_SIZE + c.y] = c.v;
-    });
+function applyData(data) {
+  if (data.map_size)  MAP_SIZE  = data.map_size;
+  if (data.map_scale) MAP_SCALE = data.map_scale;
+  // Passa o objeto inteiro — buildScene decide se usa segments ou cells
+  if (data.segments || data.cells) {
+    buildScene(data);
+    showMap();
   }
-
-  // Zoom inicial adaptado ao tamanho: 200→2x, 1000→0.6x
-  zoom = Math.max(0.5, Math.min(2, 400 / MAP_SIZE));
-  panX = 0; panY = 0;
-
-  showMap();
 }
 
 function showMap() {
   hasMap = true;
   document.getElementById('dropZone').classList.add('hidden');
-  render();
 }
 
-function clearMap() {
-  mapGrid = new Uint8Array(MAP_SIZE * MAP_SIZE);
-  waypoints = [];
-  hasMap = false;
+function clearScene() {
+  ['hi','med','low','path','wp'].forEach(k => {
+    while (layers[k].children.length) layers[k].remove(layers[k].children[0]);
+  });
+  builtCells = [];
+  waypoints  = [];
+  hasMap     = false;
+  updateWpList();
   document.getElementById('dropZone').classList.remove('hidden');
-  updateWaypointList();
-  render();
 }
 
-// ════════════════════════════════════════════════════
-//  DEMO DATA
-// ════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+//  DEMO
+// ══════════════════════════════════════════════════════════════
 function loadDemo() {
-  mapGrid = new Uint8Array(MAP_SIZE * MAP_SIZE);
-  const cx = MAP_SIZE / 2, cy = MAP_SIZE / 2;
+  const cx = 500, cy = 500;
+  const cells = [];
+  const rng = s => { let x=Math.sin(s)*10000; return x-Math.floor(x); };
 
-  // Paredes externas (retângulo)
-  for (let i = 20; i < 180; i++) {
-    set(i, 20, 1); set(i, 179, 1);
-    set(20, i, 1); set(179, i, 1);
+  // Paredes do ambiente
+  for (let i=20;i<180;i++) {
+    cells.push({x:cx+i-100,y:cy+20-100,z:0,v:OBS_HIGH_CONF});
+    cells.push({x:cx+i-100,y:cy+179-100,z:0,v:OBS_HIGH_CONF});
+    cells.push({x:cx+20-100,y:cy+i-100,z:0,v:OBS_HIGH_CONF});
+    cells.push({x:cx+179-100,y:cy+i-100,z:0,v:OBS_HIGH_CONF});
   }
-  // Parede interna com corredor
-  for (let i = 40; i < 140; i++) { if (i < 80 || i > 100) set(i, 80, 1); }
-  for (let i = 80; i < 160; i++) { if (i < 90 || i > 110) set(130, i, 1); }
-  // Obstáculos aleatórios seed-determinísticos
-  const rng = (s) => { let x=Math.sin(s)*10000; return x-Math.floor(x); };
-  for (let k = 0; k < 60; k++) {
-    const ox = Math.floor(30 + rng(k*3+1)*140);
-    const oy = Math.floor(30 + rng(k*3+2)*140);
-    if (Math.abs(ox-cx)<8 && Math.abs(oy-cy)<8) continue;
-    set(ox, oy, 1); set(ox+1, oy, 1); set(ox, oy+1, 1); set(ox+1, oy+1, 1);
+  // Obstáculos internos com variação de altura (Z)
+  for (let k=0;k<50;k++) {
+    const ox = Math.floor(30+rng(k*3+1)*140);
+    const oy = Math.floor(30+rng(k*3+2)*140);
+    const oz = rng(k*3+3)*0.5;
+    const conf = k%3===0?OBS_HIGH_CONF:k%3===1?OBS_MED_CONF:OBS_LOW_CONF;
+    cells.push({x:cx+ox-100,y:cy+oy-100,z:oz,v:conf});
   }
-  // Trilha do robô (círculo + retas)
-  for (let a = 0; a < 360; a += 2) {
-    const r = 25;
-    const tx = Math.round(cx + r * Math.cos(a * Math.PI/180));
-    const ty = Math.round(cy + r * Math.sin(a * Math.PI/180));
-    if (tx>=0&&tx<MAP_SIZE&&ty>=0&&ty<MAP_SIZE) set(tx, ty, 2);
+  // Trilha espiral
+  for (let a=0;a<720;a+=3) {
+    const r = 10 + a*0.04;
+    const tx = Math.round(cx + r*Math.cos(a*Math.PI/180));
+    const ty = Math.round(cy + r*Math.sin(a*Math.PI/180));
+    const tz = Math.sin(a*Math.PI/180)*0.2;
+    cells.push({x:tx,y:ty,z:tz,v:VAL_PATH});
   }
-  for (let i = -15; i <= 15; i++) { set(cx+i, cy, 2); set(cx, cy+i, 2); }
-  set(cx, cy, 2);
+  MAP_SIZE = 1000; MAP_SCALE = 30;
+  buildScene({ cells });
   showMap();
 }
 
-function set(x, y, v) {
-  if (x >= 0 && x < MAP_SIZE && y >= 0 && y < MAP_SIZE)
-    mapGrid[x * MAP_SIZE + y] = v;
-}
+// ══════════════════════════════════════════════════════════════
+//  DRAG & DROP
+// ══════════════════════════════════════════════════════════════
+viewport.addEventListener('dragover', e=>e.preventDefault());
+viewport.addEventListener('drop', e=>{
+  e.preventDefault();
+  if (e.dataTransfer.files[0]) readJSON(e.dataTransfer.files[0]);
+});
 
-init();
+// ══════════════════════════════════════════════════════════════
+//  RESIZE
+// ══════════════════════════════════════════════════════════════
+function onResize() {
+  const w = viewport.clientWidth, h = viewport.clientHeight;
+  renderer.setSize(w, h);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+window.addEventListener('resize', onResize);
+onResize();
+
+// ══════════════════════════════════════════════════════════════
+//  RENDER LOOP
+// ══════════════════════════════════════════════════════════════
+updateCamera();
+
+(function animate() {
+  requestAnimationFrame(animate);
+  // Rotação suave do ponto de luz para efeito neon dinâmico
+  const t = Date.now() * 0.0003;
+  pointLight.position.x = Math.sin(t) * 30;
+  pointLight.position.z = Math.cos(t) * 30;
+  renderer.render(scene, camera);
+})();
 </script>
 </body>
 </html>
